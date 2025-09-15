@@ -3,25 +3,64 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Physics Adventure: The Escapist</title>
+    <title>Physics Adventure</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Custom CSS -->
     <link rel="stylesheet" href="styles/main.css">
     <link rel="stylesheet" href="styles/ui.css">
     <link rel="stylesheet" href="styles/animations.css">
+    
+    <!-- Modern JavaScript Libraries -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/particles.js/2.0.0/particles.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/howler/2.2.4/howler.min.js"></script>
+    
+    <!-- Tailwind Configuration -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'physics-blue': '#00d4ff',
+                        'physics-purple': '#2d1b69',
+                        'physics-dark': '#0c0c1e'
+                    }
+                }
+            }
+        }
+    </script>
 </head>
 <body>
-    <div id="gameContainer">
+    <!-- Background Particles -->
+    <div id="particles-js" class="fixed inset-0 z-0"></div>
+    
+    <div id="gameContainer" class="relative z-10">
         <!-- Main Menu -->
         <div id="mainMenu" class="screen active">
-            <div class="menu-content">
-                <h1 class="game-title">Physics Adventure</h1>
-                <h2 class="game-subtitle">The Escapist</h2>
-                <div class="menu-buttons">
-                    <button id="startGame" class="menu-btn primary">Start Adventure</button>
-                    <button id="tutorialBtn" class="menu-btn">Tutorial</button>
-                    <button id="conceptsBtn" class="menu-btn">Physics Concepts</button>
+            <div class="menu-content flex flex-col items-center justify-center min-h-screen">
+                <div class="text-center space-y-8">
+                    <h1 class="game-title text-6xl md:text-8xl font-bold bg-gradient-to-r from-physics-blue to-purple-400 bg-clip-text text-transparent">
+                        Physics Adventure
+                    </h1>
+                    <h2 class="game-subtitle text-2xl md:text-3xl text-physics-blue font-light">
+                        The Escapist
+                    </h2>
+                    <div class="menu-buttons space-y-4 mt-12">
+                        <button id="startGameBtn" class="menu-btn primary w-64 py-4 text-xl bg-gradient-to-r from-physics-blue to-blue-500 hover:from-blue-500 hover:to-physics-blue transform hover:scale-105 transition-all duration-300 rounded-lg shadow-lg hover:shadow-physics-blue/50">
+                            🚀 Start Adventure
+                        </button>
+                        <button id="tutorialBtn" class="menu-btn w-64 py-4 text-xl bg-white/10 hover:bg-white/20 backdrop-blur-sm transform hover:scale-105 transition-all duration-300 rounded-lg border border-white/20">
+                            📚 Tutorial
+                        </button>
+                        <button id="conceptsBtn" class="menu-btn w-64 py-4 text-xl bg-white/10 hover:bg-white/20 backdrop-blur-sm transform hover:scale-105 transition-all duration-300 rounded-lg border border-white/20">
+                            🧪 Physics Concepts
+                        </button>
+                    </div>
                 </div>
             </div>
-            <div class="stars-background"></div>
         </div>
 
         <!-- Story Intro -->
@@ -98,6 +137,17 @@
                 <div id="trajectoryDisplay"></div>
             </div>
 
+            <!-- Dialogue Box -->
+            <div id="dialogueBox" class="dialogue-container">
+                <div class="dialogue-content">
+                    <div class="character-info">
+                        <div id="characterAvatar" class="character-avatar">✨</div>
+                        <div id="characterName" class="character-name">Universe</div>
+                    </div>
+                    <div id="dialogueText" class="dialogue-text">Click to continue...</div>
+                </div>
+            </div>
+
             <!-- Level Complete Modal -->
             <div id="levelCompleteModal" class="modal">
                 <div class="modal-content">
@@ -117,6 +167,18 @@
                     </div>
                     <button id="nextLevel" class="modal-btn primary">Next Planet</button>
                     <button id="replayLevel" class="modal-btn">Replay</button>
+                </div>
+            </div>
+
+            <!-- Pause Modal -->
+            <div id="pauseModal" class="modal">
+                <div class="modal-content">
+                    <h2>Game Paused</h2>
+                    <div class="pause-menu">
+                        <button id="resumeGame" class="modal-btn primary">Resume</button>
+                        <button id="pauseRestartLevel" class="modal-btn">Restart Level</button>
+                        <button id="pauseMainMenu" class="modal-btn">Main Menu</button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -179,10 +241,20 @@
     </div>
 
     <!-- Loading Screen -->
-    <div id="loadingScreen">
-        <div class="loading-content">
-            <div class="loading-spinner"></div>
-            <p>Loading Physics Engine...</p>
+    <div id="loadingScreen" class="screen active fixed inset-0 bg-gradient-to-br from-physics-dark via-physics-purple to-physics-dark flex items-center justify-center z-50">
+        <div class="loading-content text-center space-y-8 max-w-md mx-auto px-8">
+            <div class="loading-spinner w-16 h-16 mx-auto border-4 border-physics-blue/30 border-t-physics-blue rounded-full animate-spin"></div>
+            <h2 class="text-4xl font-bold text-physics-blue">Physics Adventure</h2>
+            <p id="loadingMessage" class="text-xl text-white">Initializing Game Systems...</p>
+            <div class="progress-container space-y-2">
+                <div class="progress-bar w-full h-2 bg-white/10 rounded-full overflow-hidden">
+                    <div id="progressBar" class="progress-fill h-full bg-gradient-to-r from-physics-blue to-blue-500 rounded-full transition-all duration-300 shadow-lg shadow-physics-blue/50" style="width: 0%"></div>
+                </div>
+                <div id="progressText" class="progress-text text-physics-blue font-bold">0%</div>
+            </div>
+            <div class="loading-tips border-t border-white/10 pt-6">
+                <p class="text-yellow-400 opacity-80 transition-opacity duration-300">💡 Tip: Use drag and drop to create physics objects!</p>
+            </div>
         </div>
     </div>
 

@@ -290,6 +290,12 @@ class StoryManager {
         });
     }
 
+    // Story control methods
+    start() {
+        console.log('Starting story system...');
+        this.startChapter('prologue');
+    }
+
     // Story progression
     startChapter(chapterId) {
         const chapter = this.storyData.chapters.find(c => c.id === chapterId);

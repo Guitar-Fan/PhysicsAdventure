@@ -57,42 +57,55 @@ class GameManager {
     // Initialize the game
     async initialize() {
         try {
-            // Show loading screen
-            this.showLoadingScreen();
+            console.log('Starting GameManager initialization...');
             
             // Initialize canvas and rendering
+            console.log('Initializing renderer...');
+            this.emit('initProgress', { step: 'renderer', progress: 20 });
             await this.initializeRenderer();
             
             // Initialize physics engine
+            console.log('Initializing physics engine...');
+            this.emit('initProgress', { step: 'physics', progress: 35 });
             await this.initializePhysics();
             
             // Initialize input handling
+            console.log('Initializing input system...');
+            this.emit('initProgress', { step: 'input', progress: 50 });
             await this.initializeInput();
             
             // Initialize UI system
+            console.log('Initializing UI system...');
+            this.emit('initProgress', { step: 'ui', progress: 65 });
             await this.initializeUI();
             
             // Initialize level management
+            console.log('Initializing level manager...');
+            this.emit('initProgress', { step: 'levels', progress: 75 });
             await this.initializeLevels();
             
             // Initialize story system
+            console.log('Initializing story system...');
+            this.emit('initProgress', { step: 'story', progress: 85 });
             await this.initializeStory();
             
             // Set up event listeners
+            console.log('Setting up event listeners...');
+            this.emit('initProgress', { step: 'events', progress: 90 });
             this.setupEventListeners();
             
             // Start game loop
+            console.log('Starting game loop...');
+            this.emit('initProgress', { step: 'gameloop', progress: 95 });
             this.startGameLoop();
             
-            // Hide loading screen and show main menu
-            this.hideLoadingScreen();
-            this.showMainMenu();
-            
-            console.log('Physics Adventure initialized successfully!');
+            console.log('GameManager initialization complete!');
+            this.emit('initProgress', { step: 'complete', progress: 100 });
             
         } catch (error) {
             console.error('Failed to initialize game:', error);
-            this.showError('Failed to initialize game. Please refresh and try again.');
+            this.emit('initError', { error: error.message });
+            throw error; // Re-throw so main.js can handle it
         }
     }
 
@@ -612,23 +625,6 @@ class GameManager {
         }
     }
 
-    showLoadingScreen() {
-        const loadingScreen = document.getElementById('loadingScreen');
-        if (loadingScreen) {
-            loadingScreen.style.display = 'flex';
-        }
-    }
-
-    hideLoadingScreen() {
-        const loadingScreen = document.getElementById('loadingScreen');
-        if (loadingScreen) {
-            loadingScreen.classList.add('hidden');
-            setTimeout(() => {
-                loadingScreen.style.display = 'none';
-            }, 500);
-        }
-    }
-
     resizeCanvas() {
         if (this.renderer) {
             this.renderer.resize();
@@ -688,6 +684,31 @@ class GameManager {
         }
     }
 
+    // Convenience methods for external usage
+    pause() {
+        this.pauseGame();
+    }
+
+    resume() {
+        this.resumeGame();
+    }
+
+    start() {
+        this.startGame();
+    }
+
+    isRunning() {
+        return this.gameState === 'playing';
+    }
+
+    isPaused() {
+        return this.gameState === 'paused';
+    }
+
+    getGameState() {
+        return this.gameState;
+    }
+
     // Debug methods
     getDebugInfo() {
         return {
@@ -697,5 +718,12 @@ class GameManager {
             physicsStats: this.physicsEngine.getStatistics(),
             progress: this.progress
         };
+    }
+
+    // Cleanup method
+    destroy() {
+        this.gameState = 'destroyed';
+        this.physicsEngine.destroy();
+        this.eventListeners.clear();
     }
 }

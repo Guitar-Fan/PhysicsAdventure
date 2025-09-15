@@ -10,22 +10,70 @@ document.addEventListener('DOMContentLoaded', async () => {
     try {
         console.log('Initializing Physics Adventure...');
         
+        // Initialize background effects
+        initializeBackgroundEffects();
+        
+        // Initialize sound system
+        soundManager.loadSounds();
+        
         // Show loading state
         showLoadingScreen();
         
-        // Initialize the game
+        // Initialize the game with detailed progress feedback
+        updateLoadingProgress('Creating Game Manager...', 0);
         game = new GameManager();
+        
+        // Listen for initialization progress events
+        game.on('initProgress', (data) => {
+            const stepMessages = {
+                'renderer': 'Setting up Graphics...',
+                'physics': 'Loading Physics Engine...',
+                'input': 'Configuring Input System...',
+                'ui': 'Building User Interface...',
+                'levels': 'Loading Levels...',
+                'story': 'Preparing Story System...',
+                'events': 'Setting up Event Handlers...',
+                'gameloop': 'Starting Game Loop...',
+                'complete': 'Game Ready!'
+            };
+            
+            const message = stepMessages[data.step] || `Loading ${data.step}...`;
+            updateLoadingProgress(message, data.progress);
+        });
+        
+        game.on('initError', (data) => {
+            console.error('Game initialization error:', data.error);
+            showErrorScreen(data.error);
+        });
+        
+        updateLoadingProgress('Initializing Systems...', 5);
+        
+        // Add a small delay to show progress
+        await new Promise(resolve => setTimeout(resolve, 100));
+        
         await game.initialize();
         
+        updateLoadingProgress('Setting up Navigation...', 95);
         // Set up global event listeners
         setupGlobalEventListeners();
         
         // Set up screen navigation
         setupScreenNavigation();
         
-        // Hide loading screen and show menu
-        hideLoadingScreen();
-        showScreen('menuScreen');
+        updateLoadingProgress('Game Ready!', 100);
+        
+        // Small delay to show 100% completion, then transition
+        setTimeout(() => {
+            console.log('Attempting to hide loading screen and show menu...');
+            try {
+                hideLoadingScreen();
+                showScreen('mainMenu');
+                console.log('Successfully transitioned to menu screen');
+            } catch (error) {
+                console.error('Error transitioning to menu:', error);
+                showErrorScreen('Failed to start game: ' + error.message);
+            }
+        }, 500); // Reduced from 1000ms to 500ms
         
         console.log('Physics Adventure initialized successfully!');
         
@@ -37,8 +85,11 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 // Screen management
 function showScreen(screenId) {
+    console.log(`Showing screen: ${screenId}`);
+    
     // Hide all screens
     const screens = document.querySelectorAll('.screen');
+    console.log(`Found ${screens.length} screens`);
     screens.forEach(screen => {
         screen.classList.remove('active');
     });
@@ -47,6 +98,10 @@ function showScreen(screenId) {
     const targetScreen = document.getElementById(screenId);
     if (targetScreen) {
         targetScreen.classList.add('active');
+        console.log(`Successfully activated screen: ${screenId}`);
+    } else {
+        console.error(`Screen not found: ${screenId}`);
+        return;
     }
     
     // Handle screen-specific setup
@@ -70,25 +125,69 @@ function handleScreenActivation(screenId) {
 }
 
 function setupScreenNavigation() {
-    // Menu navigation
-    document.getElementById('startGameBtn')?.addEventListener('click', () => {
+    // Menu navigation with enhanced interactions
+    document.getElementById('startGameBtn')?.addEventListener('click', (e) => {
+        soundManager.play('buttonClick');
+        animateButtonClick(e.target);
         game.storyManager.startChapter('prologue');
         showScreen('storyScreen');
     });
     
-    document.getElementById('tutorialBtn')?.addEventListener('click', () => {
+    document.getElementById('tutorialBtn')?.addEventListener('click', (e) => {
+        soundManager.play('buttonClick');
+        animateButtonClick(e.target);
         showScreen('tutorialScreen');
     });
     
-    document.getElementById('conceptsBtn')?.addEventListener('click', () => {
+    document.getElementById('conceptsBtn')?.addEventListener('click', (e) => {
+        soundManager.play('buttonClick');
+        animateButtonClick(e.target);
         showScreen('conceptsScreen');
     });
     
+    // Add hover effects to all menu buttons
+    document.querySelectorAll('.menu-btn').forEach(btn => {
+        btn.addEventListener('mouseenter', () => {
+            soundManager.play('buttonHover');
+            if (typeof gsap !== 'undefined') {
+                gsap.to(btn, {
+                    duration: 0.3,
+                    scale: 1.05,
+                    ease: "power2.out"
+                });
+            }
+        });
+        
+        btn.addEventListener('mouseleave', () => {
+            if (typeof gsap !== 'undefined') {
+                gsap.to(btn, {
+                    duration: 0.3,
+                    scale: 1,
+                    ease: "power2.out"
+                });
+            }
+        });
+    }
+}
+
+// Button animation helper
+function animateButtonClick(button) {
+    if (typeof gsap !== 'undefined') {
+        gsap.to(button, {
+            duration: 0.1,
+            scale: 0.95,
+            ease: "power2.out",
+            yoyo: true,
+            repeat: 1
+        });
+    }
+}
+
     // Back buttons
     const backButtons = document.querySelectorAll('.back-btn');
     backButtons.forEach(btn => {
         btn.addEventListener('click', () => {
-            showScreen('menuScreen');
+            showScreen('mainMenu');
         });
     });
     
@@ -116,8 +215,31 @@ function setupScreenNavigation() {
         if (game) {
             game.pause();
         }
-        showScreen('menuScreen');
+        showScreen('mainMenu');
         game.uiManager.hideModal('levelCompleteModal');
+    });
+
+    // Pause modal handlers
+    document.getElementById('resumeGame')?.addEventListener('click', () => {
+        if (game) {
+            game.resume();
+        }
+        game.uiManager.hideModal('pauseModal');
+    });
+    
+    document.getElementById('pauseRestartLevel')?.addEventListener('click', () => {
+        if (game) {
+            game.levelManager.restartLevel();
+        }
+        game.uiManager.hideModal('pauseModal');
+    });
+    
+    document.getElementById('pauseMainMenu')?.addEventListener('click', () => {
+        if (game) {
+            game.pause();
+        }
+        showScreen('mainMenu');
+        game.uiManager.hideModal('pauseModal');
     });
 }
 
@@ -142,7 +264,7 @@ function setupGlobalEventListeners() {
         switch (e.key) {
             case 'Escape':
                 if (game && game.isRunning()) {
-                    showScreen('menuScreen');
+                    showScreen('mainMenu');
                     game.pause();
                 }
                 break;
@@ -200,10 +322,211 @@ function showLoadingScreen() {
     }
 }
 
+function updateLoadingProgress(message, percentage) {
+    const loadingMessage = document.getElementById('loadingMessage');
+    const progressBar = document.getElementById('progressBar');
+    const progressText = document.getElementById('progressText');
+    
+    if (loadingMessage) {
+        loadingMessage.textContent = message;
+    }
+    
+    if (progressBar) {
+        progressBar.style.width = `${percentage}%`;
+    }
+    
+    if (progressText) {
+        progressText.textContent = `${percentage}%`;
+    }
+    
+    // Update loading tips based on progress
+    updateLoadingTip(percentage);
+    
+    console.log(`Loading: ${message} (${percentage}%)`);
+}
+
+function updateLoadingTip(percentage) {
+    const loadingTips = [
+        "💡 Tip: Use drag and drop to create physics objects!",
+        "🚀 Tip: Each planet has different gravity - experiment!",
+        "⚡ Tip: Watch the force vectors to understand physics!",
+        "🎯 Tip: Try different tools to see various physics concepts!",
+        "🌟 Tip: The Escapist will learn as you demonstrate physics!"
+    ];
+    
+    const tipElement = document.querySelector('.loading-tips p');
+    if (tipElement && percentage > 0) {
+        const tipIndex = Math.floor((percentage / 100) * loadingTips.length);
+        const currentTip = loadingTips[Math.min(tipIndex, loadingTips.length - 1)];
+        
+        if (tipElement.textContent !== currentTip) {
+            tipElement.style.opacity = '0';
+            setTimeout(() => {
+                tipElement.textContent = currentTip;
+                tipElement.style.opacity = '0.8';
+            }, 200);
+        }
+    }
+}
+
+// Initialize background effects
+function initializeBackgroundEffects() {
+    // Initialize particles.js
+    if (typeof particlesJS !== 'undefined') {
+        particlesJS('particles-js', {
+            particles: {
+                number: {
+                    value: 80,
+                    density: {
+                        enable: true,
+                        value_area: 800
+                    }
+                },
+                color: {
+                    value: "#00d4ff"
+                },
+                shape: {
+                    type: "circle",
+                    stroke: {
+                        width: 0,
+                        color: "#000000"
+                    }
+                },
+                opacity: {
+                    value: 0.5,
+                    random: false,
+                    anim: {
+                        enable: false,
+                        speed: 1,
+                        opacity_min: 0.1,
+                        sync: false
+                    }
+                },
+                size: {
+                    value: 3,
+                    random: true,
+                    anim: {
+                        enable: false,
+                        speed: 40,
+                        size_min: 0.1,
+                        sync: false
+                    }
+                },
+                line_linked: {
+                    enable: true,
+                    distance: 150,
+                    color: "#00d4ff",
+                    opacity: 0.4,
+                    width: 1
+                },
+                move: {
+                    enable: true,
+                    speed: 2,
+                    direction: "none",
+                    random: false,
+                    straight: false,
+                    out_mode: "out",
+                    bounce: false
+                }
+            },
+            interactivity: {
+                detect_on: "canvas",
+                events: {
+                    onhover: {
+                        enable: true,
+                        mode: "repulse"
+                    },
+                    onclick: {
+                        enable: true,
+                        mode: "push"
+                    },
+                    resize: true
+                }
+            },
+            retina_detect: true
+        });
+    }
+    
+    // Initialize GSAP animations for menu
+    if (typeof gsap !== 'undefined') {
+        // Animate title on load
+        gsap.from(".game-title", {
+            duration: 2,
+            y: -100,
+            opacity: 0,
+            ease: "bounce.out",
+            delay: 0.5
+        });
+        
+        // Animate subtitle
+        gsap.from(".game-subtitle", {
+            duration: 1.5,
+            y: 50,
+            opacity: 0,
+            ease: "power2.out",
+            delay: 1
+        });
+        
+        // Animate buttons one by one
+        gsap.from(".menu-btn", {
+            duration: 1,
+            x: -200,
+            opacity: 0,
+            ease: "back.out(1.7)",
+            stagger: 0.2,
+            delay: 1.5
+        });
+    }
+}
+
+// Sound Manager
+class SoundManager {
+    constructor() {
+        this.sounds = {};
+        this.enabled = true;
+    }
+    
+    loadSounds() {
+        if (typeof Howl === 'undefined') return;
+        
+        // Using placeholder sounds (you can replace with actual sound files)
+        this.sounds.buttonHover = new Howl({
+            src: ['data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhBiCJz/LNeSsFJHfH8N+SQw'],
+            volume: 0.1
+        });
+        
+        this.sounds.buttonClick = new Howl({
+            src: ['data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhBiCJz/LNeSsFJHfH8N+SQw'],
+            volume: 0.2
+        });
+    }
+    
+    play(soundName) {
+        if (this.enabled && this.sounds[soundName]) {
+            this.sounds[soundName].play();
+        }
+    }
+    
+    setEnabled(enabled) {
+        this.enabled = enabled;
+    }
+}
+
+// Global sound manager instance
+const soundManager = new SoundManager();
+
 function hideLoadingScreen() {
     const loadingScreen = document.getElementById('loadingScreen');
     if (loadingScreen) {
-        loadingScreen.classList.remove('active');
+        // Add fade out effect
+        loadingScreen.style.opacity = '0';
+        loadingScreen.style.transition = 'opacity 0.5s ease-out';
+        
+        // Remove from DOM after animation
+        setTimeout(() => {
+            loadingScreen.classList.remove('active');
+            loadingScreen.style.display = 'none';
+        }, 500);
     }
 }
 

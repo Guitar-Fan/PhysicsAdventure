@@ -592,6 +592,15 @@ class UIManager {
         }
     }
 
+    // Pause menu management
+    showPauseMenu() {
+        this.showModal('pauseModal');
+    }
+
+    hidePauseMenu() {
+        this.hideModal('pauseModal');
+    }
+
     // Event system
     on(event, callback) {
         if (!this.eventListeners.has(event)) {
