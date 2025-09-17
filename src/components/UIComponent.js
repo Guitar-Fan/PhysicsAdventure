@@ -1,6 +1,6 @@
 /**
  * UI Component Manager - Handles all UI interactions using external libraries
- * Uses SweetAlert2 for modals, GSAP for animations, and Tailwind CSS classes
+ * Uses SweetAlert2 for modals, CSS animations, and Tailwind CSS classes
  */
 
 class UIComponent {
@@ -57,46 +57,16 @@ class UIComponent {
     }
     
     initializeAnimations() {
-        // Animate menu items on page load
-        gsap.from('.menu-item', {
-            duration: 0.8,
-            y: 50,
-            opacity: 0,
-            stagger: 0.2,
-            ease: "back.out(1.7)"
-        });
-        
-        // Floating animation for title
-        gsap.to('#gameTitle', {
-            duration: 3,
-            y: -10,
-            repeat: -1,
-            yoyo: true,
-            ease: "sine.inOut"
-        });
+        console.log('UI animations initialized with CSS fallback');
+        // All animations are now handled by CSS classes in main.html
+        // No GSAP dependencies needed
     }
     
     async startGame() {
         console.log('Starting Physics Adventure...');
         
-        // Smooth transition animation
-        gsap.to('#mainMenu', {
-            duration: 0.5,
-            opacity: 0,
-            scale: 0.8,
-            onComplete: () => {
-                document.getElementById('mainMenu').style.display = 'none';
-                document.getElementById('gameCanvas').style.display = 'block';
-                document.getElementById('gameUI').style.display = 'block';
-                
-                // Animate game area in
-                gsap.fromTo('#gameCanvas', 
-                    { opacity: 0, scale: 0.8 },
-                    { duration: 0.5, opacity: 1, scale: 1 }
-                );
-            }
-        });
-        
+        // This function is now handled by the main app.js
+        // Screen transitions are managed there
         this.gameState = 'playing';
         
         // Show welcome message using SweetAlert2
@@ -171,23 +141,9 @@ class UIComponent {
     showMenu() {
         this.gameState = 'menu';
         
-        // Animate game area out
-        gsap.to('#gameCanvas, #gameUI', {
-            duration: 0.5,
-            opacity: 0,
-            scale: 0.8,
-            onComplete: () => {
-                document.getElementById('gameCanvas').style.display = 'none';
-                document.getElementById('gameUI').style.display = 'none';
-                document.getElementById('mainMenu').style.display = 'flex';
-                
-                // Animate menu in
-                gsap.fromTo('#mainMenu',
-                    { opacity: 0, scale: 0.8 },
-                    { duration: 0.5, opacity: 1, scale: 1 }
-                );
-            }
-        });
+        // Screen transitions are now handled by main app.js
+        // Just update the game state
+        console.log('Returning to menu');
     }
     
     loadLevel(levelNumber) {
@@ -209,12 +165,15 @@ class UIComponent {
         const indicator = document.getElementById('levelIndicator');
         if (indicator) {
             indicator.textContent = `Level ${level}`;
+            // Use CSS transitions instead of GSAP
+            indicator.style.transition = 'all 0.5s ease';
+            indicator.style.transform = 'scale(1.1)';
+            indicator.style.color = '#10b981';
             
-            // Animate level change
-            gsap.fromTo(indicator, 
-                { scale: 0.8, color: '#3b82f6' },
-                { scale: 1, color: '#10b981', duration: 0.5 }
-            );
+            setTimeout(() => {
+                indicator.style.transform = 'scale(1)';
+                indicator.style.color = '#3b82f6';
+            }, 500);
         }
     }
     

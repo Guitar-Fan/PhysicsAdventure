@@ -69,7 +69,7 @@ An interactive educational physics game where players help "The Escapist" unders
    ```
 
 3. **Open in Browser**
-   - Main Game: `http://localhost:8080/index_new.html`
+   - Main Game: `http://localhost:8080/main.html`
    - Test Page: `http://localhost:8080/test.html`
 
 ### Alternative Servers
@@ -122,7 +122,7 @@ php -S localhost:8080
 
 ```
 PhysicsAdventure/
-├── index_new.html          # Main game interface (modern)
+├── main.html          # Main game interface (modern)
 ├── test.html              # Testing page for external libraries
 ├── package.json           # Project metadata and dependencies
 ├── README.md             # This documentation
@@ -136,10 +136,7 @@ PhysicsAdventure/
 │   │   └── GameManagerSimple.js # Simplified external lib manager
 │   └── physics/         # Physics utilities
 │       └── PhysicsUtils.js
-├── assets/              # Game assets (sounds, images)
-├── lib/                # Local library files
-├── styles/             # Legacy CSS (now using Tailwind)
-└── js/                 # Legacy JavaScript (now in src/)
+└── package.json        # Project dependencies
 ```
 
 ## 🔧 Development
@@ -230,7 +227,7 @@ particles: {
 ### Debug Mode
 Add `?debug=true` to URL for debug information:
 ```
-http://localhost:8080/index_new.html?debug=true
+http://localhost:8080/main.html?debug=true
 ```
 
 ## 🤝 Contributing

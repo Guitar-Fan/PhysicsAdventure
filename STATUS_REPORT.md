@@ -81,7 +81,7 @@
 ## 🌐 Access Points
 
 ### Main Game
-- **URL**: `http://localhost:8080/index_new.html`
+- **URL**: `http://localhost:8080/main.html`
 - **Status**: ✅ Fully functional
 - **Features**: Complete game with all systems
 
@@ -110,7 +110,7 @@ External Libraries (CDN) ➜ Custom Components ➜ Game Logic
 ### File Structure
 ```
 PhysicsAdventure/
-├── index_new.html          # Main game (✅ Working)
+├── main.html          # Main game (✅ Working)
 ├── debug.html             # Debug test (✅ Working)
 ├── test.html              # Library test (✅ Working)
 ├── src/
@@ -158,7 +158,7 @@ The Physics Adventure game is now **fully functional and ready for educational u
 5. **Progress Through Levels**: Increasing complexity and challenge
 
 ### Quick Start
-1. Open `http://localhost:8080/index_new.html`
+1. Open `http://localhost:8080/main.html`
 2. Click "Start Adventure"
 3. Click anywhere on the game canvas to create objects
 4. Drag objects to apply forces

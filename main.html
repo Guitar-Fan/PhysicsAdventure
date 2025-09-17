@@ -89,15 +89,45 @@
             display: none !important;
         }
         
+        /* Show active screens properly */
+        #mainMenu.active, #gameScreen.active, #tutorialScreen.active, #conceptsScreen.active {
+            display: flex !important;
+        }
+        
+        /* Game screen specific styling */
+        #gameScreen {
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 50%, #16213e 100%);
+            color: white;
+        }
+        
+        #gameCanvas {
+            background: transparent;
+            border: 1px solid rgba(0, 212, 255, 0.3);
+        }
+        
         /* Only loading screen visible initially */
         #loadingScreen.active {
             display: flex !important;
         }
         
         .glass-effect {
-            background: rgba(255, 255, 255, 0.1);
+            background: rgba(255, 255, 255, 0.1) !important;
             backdrop-filter: blur(10px);
             border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white !important;
+        }
+        
+        /* Menu button specific styling */
+        .menu-button {
+            background: rgba(255, 255, 255, 0.1) !important;
+            color: white !important;
+            border: 1px solid rgba(255, 255, 255, 0.2) !important;
+        }
+        
+        /* Start button with gradient */
+        #startGameBtn {
+            background: linear-gradient(to right, #00d4ff, #3b82f6) !important;
+            color: white !important;
         }
         
         .neon-text {

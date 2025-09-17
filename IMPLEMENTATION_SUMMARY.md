@@ -23,7 +23,7 @@
 ### Key Files Created/Updated
 
 #### 🎯 Core Game Files
-1. **`index_new.html`** - Modern HTML with external library integration
+1. **`main.html`** - Modern HTML with external library integration
    - Comprehensive CDN library loading
    - Glass-morphism UI design with Tailwind CSS
    - Responsive layout with proper component structure
@@ -175,7 +175,7 @@
 #### 🚀 Production Setup
 1. **Local Development**: `python3 -m http.server 8080`
 2. **Test Page**: `http://localhost:8080/test.html`
-3. **Main Game**: `http://localhost:8080/index_new.html`
+3. **Main Game**: `http://localhost:8080/main.html`
 4. **Documentation**: Complete README.md with setup instructions
 
 #### 📦 Deployment Options
