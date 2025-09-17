@@ -299,20 +299,14 @@ function setupUIInteractions() {
     
     // Start Game Button
     document.getElementById('startGameBtn')?.addEventListener('click', () => {
-        console.log('🎯 Starting game...');
-        showScreen('gameScreen');
-        if (gameManager) {
-            // Initialize the game manager if not already done
-            if (!gameManager.engine) {
-                const success = gameManager.init();
-                if (success) {
-                    gameManager.startLevel(1);
-                } else {
-                    showError('Failed to initialize game engine');
-                }
-            } else {
-                gameManager.startLevel(1);
-            }
+        console.log('🎯 Starting adventure with story...');
+        showScreen('introStoryScreen');
+        
+        // Initialize story manager if not already done
+        if (!window.storyManager) {
+            window.storyManager = new StoryManager();
+        } else {
+            window.storyManager.reset();
         }
     });
     
@@ -396,6 +390,25 @@ function setupUIInteractions() {
             },
             width: '700px'
         });
+    });
+    
+    // Story Manager Event Listener - Transition to First Puzzle
+    document.addEventListener('startFirstPuzzle', () => {
+        console.log('🧩 Starting first puzzle...');
+        showScreen('gameScreen');
+        
+        // Initialize game manager for the first puzzle
+        if (!gameManager) {
+            gameManager = new GameManager();
+        }
+        
+        const success = gameManager.init();
+        if (success) {
+            // Start the zipline puzzle (level 1)
+            gameManager.startZiplinePuzzle();
+        } else {
+            showError('Failed to initialize game engine');
+        }
     });
     
     // Back buttons
