@@ -56,6 +56,7 @@ class StoryManager {
         this.nextBtn = null;
         this.prevBtn = null;
         this.startPuzzleBtn = null;
+        this.skipBtn = null;
         
         this.initialize();
     }
@@ -65,11 +66,13 @@ class StoryManager {
         this.nextBtn = document.getElementById('nextStoryBtn');
         this.prevBtn = document.getElementById('prevStoryBtn');
         this.startPuzzleBtn = document.getElementById('startPuzzleBtn');
+        this.skipBtn = document.getElementById('skipStoryBtn');
         
         // Add event listeners
         this.nextBtn.addEventListener('click', () => this.nextStory());
         this.prevBtn.addEventListener('click', () => this.prevStory());
         this.startPuzzleBtn.addEventListener('click', () => this.startFirstPuzzle());
+        this.skipBtn.addEventListener('click', () => this.skipToEnd());
         
         // Start the story
         this.showCurrentStory();
@@ -164,6 +167,12 @@ class StoryManager {
         // Trigger the transition to the first puzzle
         const event = new CustomEvent('startFirstPuzzle');
         document.dispatchEvent(event);
+    }
+    
+    skipToEnd() {
+        // Jump to the last story segment
+        this.currentStoryIndex = this.storyData.length - 1;
+        this.showCurrentStory();
     }
     
     reset() {
